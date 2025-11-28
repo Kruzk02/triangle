@@ -17,7 +17,7 @@ class Shader {
             return uniformCache[name];
         }
 
-        int location = glGetUniformLocation(ID, name.c_str());
+        const int location = glGetUniformLocation(ID, name.c_str());
         uniformCache[name] = location;
         return location;
     }
@@ -31,14 +31,14 @@ public:
             std::cerr << "ERROR::SHADER::VERTEX FILE NOT FOUND\n";
             return;
         }
-        std::string vertexCode((std::istreambuf_iterator<char>(vFile)), std::istreambuf_iterator<char>());
+        std::string vertexCode((std::istreambuf_iterator(vFile)), std::istreambuf_iterator<char>());
 
         std::ifstream fFile(fragmentPath);
         if (!fFile) {
             std::cerr << "ERROR::SHADER::FRAGMENT FILE NOT FOUND\n";
             return;
         }
-        std::string fragmentCode((std::istreambuf_iterator<char>(fFile)), std::istreambuf_iterator<char>());
+        std::string fragmentCode((std::istreambuf_iterator(fFile)), std::istreambuf_iterator<char>());
 
         const char* vShaderCode = vertexCode.c_str();
         const char* fShaderCode = fragmentCode.c_str();
@@ -46,12 +46,12 @@ public:
         unsigned int vertex, fragment;
 
         vertex = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex, 1, &vShaderCode, NULL);
+        glShaderSource(vertex, 1, &vShaderCode, nullptr);
         glCompileShader(vertex);
         checkCompileError(vertex, "VERTEX");
 
         fragment = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment, 1, &fShaderCode, NULL);
+        glShaderSource(fragment, 1, &fShaderCode, nullptr);
         glCompileShader(fragment);
         checkCompileError(fragment, "FRAGMENT");
 
@@ -65,24 +65,24 @@ public:
         glDeleteShader(fragment);
     }
 
-    void use() {
+    void use() const {
         glUseProgram(ID);
     }
 
-    void setBool(const std::string &name, bool value) const {
-        glUniform1i(getUniformLocation(name), (int) value);
+    void setBool(const std::string &name, const bool value) const {
+        glUniform1i(getUniformLocation(name), static_cast<int>(value));
     }
 
-    void setInt(const std::string &name, int value) const {
+    void setInt(const std::string &name, const int value) const {
         glUniform1i(getUniformLocation(name), value);
     }
 
-    void setFloat(const std::string &name, float value) const {
+    void setFloat(const std::string &name, const float value) const {
         glUniform1f(getUniformLocation(name), value);
     }
 
 private:
-    void checkCompileError(unsigned int shader, const std::string& type) const {
+    static void checkCompileError(const unsigned int shader, const std::string& type) {
         int success;
         if (type != "PROGRAM") {
             glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -90,7 +90,7 @@ private:
                 int logLength;
                 glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &logLength);
                 std::vector<char> infoLog(logLength);
-                glGetShaderInfoLog(shader, 1024, NULL, infoLog.data());
+                glGetShaderInfoLog(shader, 1024, nullptr, infoLog.data());
                 std::cerr << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog.data() << "\n -- --------------------------------------------------- -- " << std::endl;
             }
         } else {
@@ -99,7 +99,7 @@ private:
                 int logLength;
                 glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &logLength);
                 std::vector<char> infoLog(logLength);
-                glGetProgramInfoLog(shader, 1024, NULL, infoLog.data());
+                glGetProgramInfoLog(shader, 1024, nullptr, infoLog.data());
                 std::cerr << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog.data() << "\n -- --------------------------------------------------- -- " << std::endl;
             }
         }
