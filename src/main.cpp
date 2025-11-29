@@ -9,7 +9,7 @@ void processInput(GLFWwindow* window);
 int main() {
     const Window window{900, 720};
 
-    const Shader myShader("shader/shader.vs", "shader/shader.fs");
+    const Shader myShader("asset/shader/shader.vs", "asset/shader/shader.fs");
 
     constexpr float vertices[] = {
         -0.5f, -0.5f, 0.0f,
