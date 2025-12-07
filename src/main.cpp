@@ -3,7 +3,7 @@
 
 #include <shader.h>
 #include <window.h>
-#include <Mesh.h>
+#include <mesh.h>
 
 void processInput(GLFWwindow* window);
 
@@ -13,9 +13,9 @@ int main() {
     const Shader myShader("asset/shader/shader.vs", "asset/shader/shader.fs");
 
     const std::vector vertices = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
     };
 
      const std::vector<unsigned int> indices = {
