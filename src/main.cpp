@@ -24,12 +24,16 @@ int main() {
 
     const Mesh mesh(vertices, indices);
 
+    GLint timeLoc = glGetUniformLocation(myShader.ID, "uTime");
+
     while(!window.shouldClose()) {
         processInput(window.getNativeWindow());
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        
+
+        float time = glfwGetTime();
+        glUniform1f(timeLoc, time);
         myShader.use();
         mesh.draw();
 
