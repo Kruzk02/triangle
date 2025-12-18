@@ -2,10 +2,14 @@
 #include <vector>
 
 #include "glad/glad.h"
+#include "layout.h"
 
 class Mesh {
 public:
-    Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices) : indexCount(indices.size()){
+    Mesh(const std::vector<float>& vertices,
+         const std::vector<unsigned int>& indices,
+         const VertexLayout& layout)
+    : indexCount(indices.size()) {
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
         glGenBuffers(1, &EBO);
@@ -24,13 +28,17 @@ public:
             indices.data(),
             GL_STATIC_DRAW);
 
-        constexpr GLsizei stride = 6 * sizeof(float);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, static_cast<void *>(nullptr));
-        glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<void *>(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
+        for (const auto&[index, count, type, normalized, offset] : layout.attributes) {
+            glEnableVertexAttribArray(index);
+            glVertexAttribPointer(
+                index,
+                count,
+                type,
+                normalized,
+                layout.stride,
+                reinterpret_cast<void*>(offset)
+            );
+        }
 
         glBindVertexArray(0);
     }

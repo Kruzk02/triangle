@@ -21,11 +21,19 @@ int main() {
         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
     };
 
-     const std::vector<unsigned int> indices = {
+    const std::vector<unsigned int> indices = {
         0, 1, 2
     };
 
-    const Mesh mesh(vertices, indices);
+    const VertexLayout layout {
+        {
+            {0, 3, GL_FLOAT, GL_FALSE, 0},
+            {1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float)}
+        },
+        6 * sizeof(float)
+    };
+
+    const Mesh mesh(vertices, indices, layout);
     const Texture texture {"asset/wall.jpg"};
 
     myShader.setInt("uTexture", 0);
