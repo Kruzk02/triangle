@@ -71,8 +71,6 @@ int main() {
 
     myShader.setInt("uTexture", 0);
 
-    const GLint timeLoc = glGetUniformLocation(myShader.ID, "uTime");
-
     Transform transform;
 
     const glm::mat4 view = glm::lookAt(
@@ -101,7 +99,6 @@ int main() {
         myShader.setMat4("uModel", transform.matrix());
         myShader.setMat4("uView", view);
         myShader.setMat4("uProjection", projection);
-        glUniform1f(timeLoc, static_cast<float>(glfwGetTime()));
         texture.bind();
         mesh.draw();
 
