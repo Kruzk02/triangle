@@ -10,6 +10,7 @@ target_include_directories(glad_c PUBLIC lib/glad/include)
 
 # Glfw
 add_subdirectory(lib/glfw)
+add_subdirectory(lib/glm)
 
 #Opengl
 find_package(OpenGL REQUIRED)
@@ -26,4 +27,5 @@ target_link_libraries(MyApp PRIVATE
         glad_c
         glfw
         OpenGL::GL
+        glm::glm
 )

@@ -4,9 +4,8 @@
 #include <shader.h>
 #include <window.h>
 #include <mesh.h>
-
-#include "stb_image.h"
-#include "texture.h"
+#include <texture.h>
+#include <transform.h>
 
 void processInput(GLFWwindow* window);
 
@@ -40,16 +39,25 @@ int main() {
 
     const GLint timeLoc = glGetUniformLocation(myShader.ID, "uTime");
 
+    Transform transform;
+
+
     while(!window.shouldClose()) {
         processInput(window.getNativeWindow());
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        const auto time = static_cast<float>(glfwGetTime());
-        glUniform1f(timeLoc, time);
+        static float lastTime = 0.0f;
+        const auto currentTime = static_cast<float>(glfwGetTime());
+        const auto deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
+
+        glUniform1f(timeLoc, currentTime);
+        transform.rotation.y += glm::radians(45.0f) * deltaTime;
 
         myShader.use();
+        myShader.setMat4("transform", transform.matrix());
         texture.bind();
         mesh.draw();
 

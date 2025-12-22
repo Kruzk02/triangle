@@ -9,6 +9,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "glm/ext/matrix_float4x4.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 class Shader {
     mutable std::unordered_map<std::string, int> uniformCache;
 
@@ -79,6 +82,10 @@ public:
 
     void setFloat(const std::string &name, const float value) const {
         glUniform1f(getUniformLocation(name), value);
+    }
+
+    void setMat4(const std::string &name, const glm::mat4 &value) const {
+        glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
     }
 
 private:
