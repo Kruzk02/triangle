@@ -7,6 +7,7 @@
 #include <texture.h>
 #include <transform.h>
 
+float getDeltaTime();
 void processInput(GLFWwindow* window);
 
 int main() {
@@ -41,6 +42,18 @@ int main() {
 
     Transform transform;
 
+    const glm::mat4 view = glm::lookAt(
+        glm::vec3(0, 0, 1),
+        glm::vec3(0, 0, 0),
+        glm::vec3(0, 1, 0)
+    );
+
+    const glm::mat4 projection = glm::perspective(
+        glm::radians(60.0f),
+        1080.0f / 920.0f,
+        0.1f,
+        100.0f
+    );
 
     while(!window.shouldClose()) {
         processInput(window.getNativeWindow());
@@ -48,16 +61,14 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        static float lastTime = 0.0f;
-        const auto currentTime = static_cast<float>(glfwGetTime());
-        const auto deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
-
-        glUniform1f(timeLoc, currentTime);
+        const float deltaTime = getDeltaTime();
         transform.rotation.y += glm::radians(45.0f) * deltaTime;
 
         myShader.use();
-        myShader.setMat4("transform", transform.matrix());
+        myShader.setMat4("uModel", transform.matrix());
+        myShader.setMat4("uView", view);
+        myShader.setMat4("uProjection", projection);
+        glUniform1f(timeLoc, static_cast<float>(glfwGetTime()));
         texture.bind();
         mesh.draw();
 
@@ -66,6 +77,14 @@ int main() {
     }
 
     return 0;
+}
+
+float getDeltaTime() {
+    static float last = 0.0f;
+    const auto now = static_cast<float>(glfwGetTime());
+    const float dt = now - last;
+    last = now;
+    return dt;
 }
 
 void processInput(GLFWwindow *window)

@@ -4,10 +4,12 @@ layout (location = 1) in vec2 aUV;
 
 out vec2 vUV;
 
-uniform mat4 transform;
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProjection;
 
 void main()
 {
-    gl_Position = transform * vec4(aPos, 1.0f);
-    vUV = vec2(aUV.x, aUV.y);
+    gl_Position = uProjection * uView * uModel * vec4(aPos, 1.0f);
+    vUV = aUV;
 }
