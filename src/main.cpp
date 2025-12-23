@@ -6,9 +6,16 @@
 #include <mesh.h>
 #include <texture.h>
 #include <transform.h>
+#include <camera.h>
+
+float lastX = 400.0f;
+float lastY = 300.0f;
+bool firstMouse = true;
 
 float getDeltaTime();
 void processInput(GLFWwindow* window);
+void processCameraInput(GLFWwindow* window, Camera& camera, float deltaTime);
+void mouseCallback(GLFWwindow* window, double xPos, double yPos);
 
 int main() {
     const Window window{900, 720};
@@ -72,33 +79,33 @@ int main() {
     myShader.setInt("uTexture", 0);
 
     Transform transform;
+    Camera camera(glm::vec3(0, 0, 3), glm::vec3(0, 1, 0));
 
-    const glm::mat4 view = glm::lookAt(
-        glm::vec3(0, 0, 3),
-        glm::vec3(0, 0, 0),
-        glm::vec3(0, 1, 0)
-    );
-
-    const glm::mat4 projection = glm::perspective(
-        glm::radians(60.0f),
-        900 / 720.0f,
-        0.1f,
-        100.0f
-    );
+    glfwSetWindowUserPointer(window.getNativeWindow(), &camera);
+    glfwSetCursorPosCallback(window.getNativeWindow(), mouseCallback);
+    glfwSetInputMode(window.getNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     while(!window.shouldClose()) {
+        const float deltaTime = getDeltaTime();
+
         processInput(window.getNativeWindow());
+        processCameraInput(window.getNativeWindow(), camera, deltaTime);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        const float deltaTime = getDeltaTime();
         transform.rotation.y += glm::radians(45.0f) * deltaTime;
 
         myShader.use();
+
         myShader.setMat4("uModel", transform.matrix());
-        myShader.setMat4("uView", view);
-        myShader.setMat4("uProjection", projection);
+        myShader.setMat4("uView", camera.getViewMatrix());
+        myShader.setMat4("uProjection", glm::perspective(
+            glm::radians(camera.getZoom()),
+            900.0f / 720.0f,
+            0.1f,
+            100.0f
+        ));
         texture.bind();
         mesh.draw();
 
@@ -121,4 +128,37 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+}
+
+void processCameraInput(GLFWwindow *window, Camera &camera, const float deltaTime) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.processKeyboard(CameraMovement::FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.processKeyboard(CameraMovement::BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.processKeyboard(CameraMovement::LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.processKeyboard(CameraMovement::RIGHT, deltaTime);
+}
+
+void mouseCallback(GLFWwindow* window, const double xPos, const double yPos) {
+    auto* camera =
+        static_cast<Camera*>(glfwGetWindowUserPointer(window));
+
+    if (!camera) return;
+
+    if (firstMouse) {
+        lastX = static_cast<float>(xPos);
+        lastY = static_cast<float>(yPos);
+        firstMouse = false;
+        return;
+    }
+
+    const float xOffset = static_cast<float>(xPos) - lastX;
+    const float yOffset = lastY - static_cast<float>(yPos);
+
+    lastX = static_cast<float>(xPos);
+    lastY = static_cast<float>(yPos);
+
+    camera->processMouseMovement(xOffset, yOffset);
 }
