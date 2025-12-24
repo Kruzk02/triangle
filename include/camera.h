@@ -31,7 +31,7 @@ public:
         float upX, float upY, float upZ,
         float yaw, float pitch,
         const CameraSettings& settings = {}) :
-    front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(settings.speed), zoom(settings.zoom), mouseSensitivity(settings.sensitivity) {
+    front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(settings.speed), mouseSensitivity(settings.sensitivity), zoom(settings.zoom) {
         this->position = glm::vec3(posX, posY, posZ);
         this->worldUp = glm::vec3(upX, upY, upZ);
         this->yaw = yaw;
