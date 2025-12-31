@@ -9,22 +9,28 @@
 #include "window.h"
 #include "GLFW/glfw3.h"
 
-float lastX = 400.0f;
-float lastY = 300.0f;
-bool firstMouse = true;
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
-float getDeltaTime();
-void processInput(GLFWwindow* window);
-void processCameraInput(GLFWwindow* window, Camera& camera, float deltaTime);
+constexpr float FOV = 45.0f;
+constexpr float NEAR_PLANE = 0.1f;
+constexpr float FAR_PLANE = 100.0f;
+
+MouseState mouseState;
+
+void updateDeltaTime();
+void processInput(GLFWwindow* window, Camera& camera);
 void mouseCallback(GLFWwindow* window, double xPos, double yPos);
 void scrollCallBack(GLFWwindow* window, double xOffset, double yOffset);
 
 void Application::run() {
-    const Window window {900, 720};
+    constexpr AppConfig appConfig;
+
+    const Window window {appConfig.width, appConfig.height};
     const auto nativeWindow = window.getNativeWindow();
     glEnable(GL_DEPTH_TEST);
 
-    const Shader myShader("asset/shader/shader.vs", "asset/shader/shader.fs");
+    const Shader myShader(appConfig.shaderVertex, appConfig.shaderFragment);
 
     const std::vector vertices = {
         -0.5f,-0.5f,-0.5f,  0.0f,0.0f,
@@ -89,15 +95,14 @@ void Application::run() {
     glfwSetInputMode(nativeWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     while (!window.shouldClose()) {
-        const float deltaTime = getDeltaTime();
+        updateDeltaTime();
 
-        processInput(nativeWindow);
-        processCameraInput(nativeWindow, camera, deltaTime);
+        processInput(nativeWindow, camera);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        transform.rotation.y += glm::radians(45.0f) * deltaTime;
+        transform.rotation.y += glm::radians(FOV) * deltaTime;
 
         myShader.use();
 
@@ -106,8 +111,8 @@ void Application::run() {
         myShader.setMat4("uProjection", glm::perspective(
             glm::radians(camera.getZoom()),
             900.0f / 720.0f,
-            0.1f,
-            100.0f
+            NEAR_PLANE,
+            FAR_PLANE
         ));
 
         texture.bind();
@@ -118,21 +123,16 @@ void Application::run() {
     }
 }
 
-float getDeltaTime() {
-    static float last = 0.0f;
+void updateDeltaTime() {
     const auto now = static_cast<float>(glfwGetTime());
-    const float dt = now - last;
-    last = now;
-    return dt;
+    deltaTime = now - lastFrame;
+    lastFrame = now;
 }
 
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow *window, Camera &camera)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-}
-
-void processCameraInput(GLFWwindow *window, Camera &camera, const float deltaTime) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.processKeyboard(CameraMovement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -149,18 +149,18 @@ void mouseCallback(GLFWwindow* window, const double xPos, const double yPos) {
 
     if (!camera) return;
 
-    if (firstMouse) {
-        lastX = static_cast<float>(xPos);
-        lastY = static_cast<float>(yPos);
-        firstMouse = false;
+    if (mouseState.firstMouse) {
+        mouseState.lastX = static_cast<float>(xPos);
+        mouseState.lastY = static_cast<float>(yPos);
+        mouseState. firstMouse = false;
         return;
     }
 
-    const float xOffset = static_cast<float>(xPos) - lastX;
-    const float yOffset = lastY - static_cast<float>(yPos);
+    const float xOffset = static_cast<float>(xPos) - mouseState.lastX;
+    const float yOffset = mouseState.lastY - static_cast<float>(yPos);
 
-    lastX = static_cast<float>(xPos);
-    lastY = static_cast<float>(yPos);
+    mouseState.lastX = static_cast<float>(xPos);
+    mouseState.lastY = static_cast<float>(yPos);
 
     camera->processMouseMovement(xOffset, yOffset);
 }
