@@ -52,7 +52,7 @@ constexpr float ROT_SPEED = glm::radians(90.0f);
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) // NOLINT
 {
-    Input::setKey({key, action});
+    Input::setKey({.key = key, .action = action});
 }
 
 Application::Application(const AppConfig &config)
@@ -72,6 +72,8 @@ Application::Application(const AppConfig &config)
     glfwSetInputMode(nativeWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glEnable(GL_DEPTH_TEST);
+
+    glDepthFunc(GL_LESS);
     glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
