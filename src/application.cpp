@@ -8,6 +8,7 @@
 #include "model.hpp"
 #include "shader.hpp"
 #include "transform.hpp"
+#include <iostream>
 #include <utility>
 
 namespace RenderDefaults
@@ -104,7 +105,8 @@ void Application::render()
     glm::mat4 view = camera.getViewMatrix();
     glm::mat4 projection =
         glm::perspective(glm::radians(camera.getZoom()),
-                         static_cast<float>(config.width) / static_cast<float>(config.height),
+                         static_cast<float>(window.getWindowData().width) /
+                             static_cast<float>(window.getWindowData().height),
                          ProjectionDefaults::NearPlane, ProjectionDefaults::FarPlane);
 
     gridShader.use();

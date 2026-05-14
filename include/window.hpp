@@ -3,6 +3,12 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
+struct WindowData
+{
+    int width;
+    int height;
+};
+
 class Window
 {
   public:
@@ -24,8 +30,14 @@ class Window
         return window;
     }
 
+    [[nodiscard]] auto getWindowData() const -> WindowData
+    {
+        return windowData;
+    }
+
   private:
     GLFWwindow *window;
+    WindowData windowData;
 
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 };

@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "GLFW/glfw3.h"
 
 #include <stdexcept>
 
@@ -13,7 +14,24 @@ Window::Window(const int width, const int height, const char *title)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+    GLFWmonitor *monitor = nullptr;
+
+    int finalWidth = width;
+    int finalHeight = height;
+
+    if (width == 0 && height == 0)
+    {
+        monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+        finalWidth = mode->width;
+        finalHeight = mode->height;
+    }
+
+    windowData.width = finalWidth;
+    windowData.height = finalHeight;
+
+    window = glfwCreateWindow(finalWidth, finalHeight, title, monitor, nullptr);
     if (window == nullptr)
     {
         throw std::runtime_error("Failed to create GLFW window");
@@ -30,6 +48,7 @@ Window::Window(const int width, const int height, const char *title)
     }
 
     glfwMakeContextCurrent(window);
+    glfwSetWindowUserPointer(window, &windowData);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
@@ -41,11 +60,21 @@ Window::~Window()
 {
     if (window)
         glfwDestroyWindow(window);
-    if (glfwInit())
-        glfwTerminate();
+    glfwTerminate();
 }
 
 void Window::framebuffer_size_callback(GLFWwindow *window, const int width, const int height)
 {
+    if (width == 0 || height == 0)
+        return;
+
+    auto *data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+    if (!data)
+    {
+        printf("NO USER POINTER\n");
+        return;
+    }
+    data->width = width;
+    data->height = height;
     glViewport(0, 0, width, height);
 }
