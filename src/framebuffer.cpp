@@ -62,5 +62,5 @@ void FrameBuffer::resize(int width, int height)
 
 auto FrameBuffer::getColorAttachment() -> Texture &
 {
-    return getColorAttachment();
+    return colorAttachment;
 }

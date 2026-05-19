@@ -40,6 +40,8 @@ class Texture
 {
   public:
     explicit Texture(const std::string &path, TextureType type, bool flip = false);
+    explicit Texture(int width, int height);
+
     ~Texture();
 
     Texture(const Texture &) = delete;
